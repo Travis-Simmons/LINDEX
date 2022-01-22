@@ -1,0 +1,7 @@
+opencv-python
+xtarfile[zstd]
+GDAL==3.0.4
+pytest-shutil
+rasterio
+moviepy
+matplotlib
