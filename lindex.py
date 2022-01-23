@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from rasterio.plot import show
 from moviepy.editor import ImageSequenceClip
 
+# singularity run test.simg ~/data/landsat -b 444596.16110394 3437984.92577712 472974.60807573 3453852.93907577
 
 
 # --------------------------------------------------
@@ -52,8 +53,243 @@ def get_args():
                         type=float,
                         default=0.7)
 
+    parser.add_argument('-in',
+                        '--index',
+                        help='What index to run',
+                        metavar='index',
+                        type=str,
+                        default='NDWI')
+
     return parser.parse_args()
 
+
+# ------- Functions --------
+def do_ndwi(date_folder):
+
+    band3 = glob.glob(os.path.join(date_folder, '*B3.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b3 = rio.open(band3[0])
+    b5 = rio.open(band5[0])
+    green = b3.read()
+    nir = b5.read()
+    green = green.astype(float)
+    nir = nir.astype(float)
+    ndwi = (nir-green)/(nir+green)
+    b3.close()
+    b5.close()
+    return ndwi
+
+def do_ndvi(date_folder):
+    band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b4 = rio.open(band4[0])
+    b5 = rio.open(band5[0])
+    red = b4.read()
+    nir = b5.read()
+    red = red.astype(float)
+    nir = nir.astype(float)
+    ndvi = (nir-red)/(nir+red)
+    b4.close()
+    b5.close()
+    return ndvi
+
+def do_evi(date_folder):
+    band2 = glob.glob(os.path.join(date_folder, '*B2.TIF'))
+    band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b2 = rio.open(band2[0])
+    b4 = rio.open(band4[0])
+    b5 = rio.open(band5[0])
+    blue = b2.read()
+    red = b4.read()
+    nir = b5.read()
+    blue = blue.astype(float)
+    red = red.astype(float)
+    nir = nir.astype(float)
+    g = 2.5
+    c1 = 6
+    c2 = 7.5
+    l = 1
+    
+    evi =g*((nir-red)/(nir+c1*red-c2*blue+l)) 
+    b2.close()
+    b4.close()
+    b5.close()
+    return evi
+
+def do_avi(date_folder):
+    band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b4 = rio.open(band4[0])
+    b5 = rio.open(band5[0])
+    red = b4.read()
+    nir = b5.read()
+    red = red.astype(float)
+    nir = nir.astype(float)
+    avi = (nir*(1-red)*(nir-red))**(1/3)
+    b4.close()
+    b5.close()
+    return avi
+
+def do_savi(date_folder):
+    band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b4 = rio.open(band4[0])
+    b5 = rio.open(band5[0])
+    red = b4.read()
+    nir = b5.read()
+    red = red.astype(float)
+    nir = nir.astype(float)
+    l = .5
+    savi = ((nir-red)/(nir+red+l))*(1+l)
+    b4.close()
+    b5.close()
+    return savi
+
+def do_ndmi(date_folder):
+    band6 = glob.glob(os.path.join(date_folder, '*B6.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b6 = rio.open(band6[0])
+    b5 = rio.open(band5[0])
+    swir = b6.read()
+    nir = b5.read()
+    swir = swir.astype(float)
+    nir = nir.astype(float)
+    ndmi = (nir-swir)/(nir+swir)
+    b6.close()
+    b5.close()
+    return ndmi
+
+def do_msi(date_folder):
+    band6 = glob.glob(os.path.join(date_folder, '*B6.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b6 = rio.open(band6[0])
+    b5 = rio.open(band5[0])
+    swir = b6.read()
+    nir = b5.read()
+    swir = swir.astype(float)
+    nir = nir.astype(float)
+    msi = swir/nir
+    b6.close()
+    b5.close()
+    return msi
+
+def do_gci(date_folder):
+    band6 = glob.glob(os.path.join(date_folder, '*B6.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b6 = rio.open(band6[0])
+    b5 = rio.open(band5[0])
+    swir = b6.read()
+    nir = b5.read()
+    swir = swir.astype(float)
+    nir = nir.astype(float)
+    msi = swir/nir
+    b6.close()
+    b5.close()
+    return gci
+
+def do_gci(date_folder):
+
+    band3 = glob.glob(os.path.join(date_folder, '*B3.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b3 = rio.open(band3[0])
+    b5 = rio.open(band5[0])
+    green = b3.read()
+    nir = b5.read()
+    green = green.astype(float)
+    nir = nir.astype(float)
+    gci = (nir/green)-1
+    b3.close()
+    b5.close()
+    return gci
+
+def do_nbri(date_folder):
+    band7 = glob.glob(os.path.join(date_folder, '*B7.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    b7 = rio.open(band7[0])
+    b5 = rio.open(band5[0])
+    swir = b7.read()
+    nir = b5.read()
+    swir = swir.astype(float)
+    nir = nir.astype(float)
+    nbri = (nir-swir)/(nir+swir)
+    b7.close()
+    b5.close()
+    return nbri
+
+def do_bsi(date_folder):
+    band2 = glob.glob(os.path.join(date_folder, '*B2.TIF'))
+    band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
+    band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
+    band6 = glob.glob(os.path.join(date_folder, '*B6.TIF'))
+    b2 = rio.open(band2[0])
+    b4 = rio.open(band4[0])
+    b5 = rio.open(band5[0])
+    b6 = rio.open(band6[0])
+    blue = b2.read()
+    red = b4.read()
+    nir = b5.read()
+    swir = b6.read()
+    blue = blue.astype(float)
+    red = red.astype(float)
+    nir = nir.astype(float)
+    swir = swir.astype(float)
+    
+    bsi = ((red+swir)-(nir+blue))/((red+swir) + (nir+blue))
+    b2.close()
+    b4.close()
+    b5.close()
+    b6.close()
+    return bsi
+
+def do_ndsi(date_folder):
+
+    band3 = glob.glob(os.path.join(date_folder, '*B3.TIF'))
+    band6 = glob.glob(os.path.join(date_folder, '*B6.TIF'))
+    b3 = rio.open(band3[0])
+    b6 = rio.open(band6[0])
+    green = b3.read()
+    swir = b6.read()
+    green = green.astype(float)
+    swir = swir.astype(float)
+    ndsi = (green-swir) / (green-swir)
+    b3.close()
+    b6.close()
+    return gci
+
+
+def do_ndgi(date_folder):
+
+    band3 = glob.glob(os.path.join(date_folder, '*B3.TIF'))
+    band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
+    b3 = rio.open(band3[0])
+    b4 = rio.open(band4[0])
+    nir = b3.read()
+    green = b4.read()
+    green = green.astype(float)
+    nir = swir.astype(float)
+    ndgi = (nir-green)/(nir+green)
+    b3.close()
+    b4.close()
+    return ndgi
+
+
+
+index_dict = {
+    'ndwi': do_ndwi,
+    'ndvi': do_ndvi,
+    'evi' : do_evi,
+    'avi' : do_avi,
+    'savi' : do_savi,
+    'ndmi' : do_ndmi,
+    'msi' : do_msi,
+    'gci' : do_gci,
+    'nbri' : do_nbri,
+    'bsi' : do_bsi,
+    'ndsi' : do_ndsi,
+    'ndgi' : do_ndgi,
+    
+}
 
 # --------------------------------------------------
 def main():
@@ -89,6 +325,8 @@ def main():
     xmax = int(bb[2])
     ymax = int(bb[3])
 
+
+    index_name = args.index
     #--------------------------------------------------------------------------
 
     # -Main-
@@ -175,10 +413,10 @@ def main():
     if not os.path.exists(os.path.join(args.indir, 'clear')):
             os.makedirs(os.path.join(args.indir, 'clear'))
             
-    if not os.path.exists(os.path.join(args.indir, 'NDWI')):
-            os.makedirs(os.path.join(args.indir, 'NDWI'))
+    if not os.path.exists(os.path.join(args.indir, index_name)):
+            os.makedirs(os.path.join(args.indir, index_name))
     
-    print('Scanning for cloudcover and running NDWI analysis...')
+    print(f'Scanning for cloudcover and running {index_name} analysis...')
 
     for date_folder in lv2:
 
@@ -222,33 +460,21 @@ def main():
 
 
                         # Here we can take flags for any index
+                        index_eval = index_dict[args.index](date_folder)
 
-                        # Calculation
-                        # NDWI = (3 - 5)/(3 + 5)
-                        date_folder
-                        band3 = glob.glob(os.path.join(date_folder, '*B3.TIF'))
-                        band5 = glob.glob(os.path.join(date_folder, '*B5.TIF'))
-                        b3 = rio.open(band3[0])
-                        b5 = rio.open(band5[0])
-                        green = b3.read()
-                        nir = b5.read()
-                        ndwi = (nir.astype(float)-green.astype(float))/(nir+green)
-                        print(type(ndwi))
 
 
 
 
                         # Plotting
                         fig, ax = plt.subplots(1, figsize=(12, 10))
-                        show(ndwi, ax=ax, cmap="coolwarm_r")
+                        show(index_eval, ax=ax, cmap="coolwarm_r")
                         # testing
                         plt.axis('off')
 
-                        plt.savefig(os.path.join(date_folder, date + '_NDWI.TIF'), bbox_inches = 'tight')
-                        plt.savefig(os.path.join(args.indir, 'NDWI' , date + '_NDWI.TIF'), bbox_inches = 'tight')
+                        plt.savefig(os.path.join(date_folder, date + f'_{index_name}.TIF'), bbox_inches = 'tight')
+                        plt.savefig(os.path.join(args.indir, index_name , date + f'_{index_name}.TIF'), bbox_inches = 'tight')
                         
-                        b3.close()
-                        b5.close()
 
                         try:
                             shutil.move(os.path.join(args.indir,  date), os.path.join(args.indir, 'clear'))
@@ -256,7 +482,7 @@ def main():
                             continue
 
 
-    ndwi_TIFs = glob.glob(os.path.join(args.indir, 'NDWI', '*.TIF'))
+    ndwi_TIFs = glob.glob(os.path.join(args.indir, index_name, '*.TIF'))
 
    
     for i in ndwi_TIFs:
@@ -275,10 +501,10 @@ def main():
 
     # ndwi_TIFs_labeled = glob.glob(os.path.join(args.indir, 'NDWI', '*labeled.TIF'))
     clip = ImageSequenceClip(ndwi_TIFs,fps=.20)
-    clip.write_gif(os.path.join(args.indir, 'NDWI', 'final.gif'))
+    clip.write_gif(os.path.join(args.indir, index_name, 'final.gif'))
 
 
-    print(f'Finished analysis, find NDWI outputs at {os.path.join(args.indir,"NDWI")}.')
+    print(f'Finished analysis, find {index_name} outputs at {os.path.join(args.indir,index_name)}.')
 
 # --------------------------------------------------
 if __name__ == '__main__':
