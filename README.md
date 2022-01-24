@@ -1,6 +1,6 @@
-# LaNDWI
+# LINDEX
 
-LaNDWI is a containerized Landsat 8 processing tool for timeseries NDWI analysis.
+LINDEX is a containerized Landsat 8 processing tool for timeseries index analysis.
 
 ## Inputs
 
@@ -15,7 +15,8 @@ The origional Landast 8 data cropped to your region of interest and sorted by cl
 * **Positional Arguments:**
     * **Directory containing compressed Landsat 8 data:** 'indir'
 * **Required Arguments:**
-    * **Corner cordinates of GPS bounding box for your region of intrest:** '-b', '--bounding_box'
+    * **Corner cordinates of GPS bounding box for your region of intrest in UTM:** '-b', '--bounding_box'
+    * **Index you would like to run (options below):** '-in', '--index'
 * **Optional Arguments:**
     * **Strictness of cloud detection:** '-c', '--how_strict', default = 0.7 (the lower the value the more strict)
 
@@ -27,11 +28,11 @@ The origional Landast 8 data cropped to your region of interest and sorted by cl
 3. Uncompress one TAR
 4. Use QGIS to visualize one band
 5. Zoom into your ROI
-6. Use the QGIS 'Lat Lon Tools' plugin to copy the canvas coordinates
-7. Run the container using the canvas cordinates as the -b flag
+6. Use the QGIS 'Lat Lon Tools' plugin to copy the canvas coordinates (modify plugin setting to take coordinates in UTM with spaces separating)
+7. Run the container
 
 ## Example Deployment
 singularity build landwi.img docker://travissimmons/landwi
 
-singularity run landwi.img {PATH TO COMPRESSED DATA} -b {PASTE CORNER COORDINATES}
+singularity run lindex.img {PATH TO COMPRESSED DATA} -b {PASTE CORNER COORDINATES} -in {index name}
 
