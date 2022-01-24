@@ -9,7 +9,7 @@ A directory containing compressed Landsat 8 data, and corner cordinates for your
 
 ## Outputs
 
-The origional Landast 8 data cropped to your region of interest and sorted by cloudcover as well as the results of the NDWI analysis for each non-cloudy day.
+The origional Landast 8 data cropped to your region of interest and sorted by cloudcover as well as the results of the selected analysis for each non-cloudy day.
 
 ## Arguments and Flags
 * **Positional Arguments:**
@@ -32,7 +32,7 @@ The origional Landast 8 data cropped to your region of interest and sorted by cl
 7. Run the container
 
 ## Example Deployment
-singularity build landwi.img docker://travissimmons/landwi
+singularity build lindex.img docker://travissimmons/lindex:all_indices
 
 singularity run lindex.img {PATH TO COMPRESSED DATA} -b {PASTE CORNER COORDINATES} -in {index name}
 
