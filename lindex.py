@@ -255,7 +255,7 @@ def do_ndsi(date_folder):
     ndsi = (green-swir) / (green-swir)
     b3.close()
     b6.close()
-    return gci
+    return ndsi
 
 
 def do_ndgi(date_folder):
@@ -267,7 +267,7 @@ def do_ndgi(date_folder):
     nir = b3.read()
     green = b4.read()
     green = green.astype(float)
-    nir = swir.astype(float)
+    nir = nir.astype(float)
     ndgi = (nir-green)/(nir+green)
     b3.close()
     b4.close()
@@ -275,21 +275,7 @@ def do_ndgi(date_folder):
 
 
 
-index_dict = {
-    'ndwi': do_ndwi,
-    'ndvi': do_ndvi,
-    'evi' : do_evi,
-    'avi' : do_avi,
-    'savi' : do_savi,
-    'ndmi' : do_ndmi,
-    'msi' : do_msi,
-    'gci' : do_gci,
-    'nbri' : do_nbri,
-    'bsi' : do_bsi,
-    'ndsi' : do_ndsi,
-    'ndgi' : do_ndgi,
-    
-}
+
 
 # --------------------------------------------------
 def main():
@@ -318,6 +304,22 @@ def main():
     # x2 = 169515
     # y2 = 3462902
 
+
+    index_dict = {
+    'ndwi': do_ndwi, # working
+    'ndvi': do_ndvi, # working
+    'evi' : do_evi,
+    'avi' : do_avi,
+    'savi' : do_savi, # working
+    'ndmi' : do_ndmi,
+    'msi' : do_msi,
+    'gci' : do_gci,
+    'nbri' : do_nbri,
+    'bsi' : do_bsi,
+    'ndsi' : do_ndsi,
+    'ndgi' : do_ndgi, # not working
+
+    }
     bb = args.bounding_box
 
     xmin = int(bb[0])
