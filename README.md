@@ -37,8 +37,17 @@ singularity build lindex.img docker://travissimmons/lindex:all_indices
 singularity run lindex.img {PATH TO COMPRESSED DATA} -b {PASTE CORNER COORDINATES} -in {index name}
 
 
-| test |         |          |   |   |
-|------|---------|----------|---|---|
-|      | we are  |          |   |   |
-|      |         | there is |   |   |
-|      |         |          |   |   |
+| Index Name                                     | Formula                                         | Citation |
+|------------------------------------------------|-------------------------------------------------|----------|
+| Normalized Difference Water Index (NDWI)       |                                                 |          |
+| Normalized Differencce Vegetation Index (NDVI) | (NIR-RED)/(NIR+RED)                             |          |
+| Enhanced Vegetation Index (EVI)                | G*((NIR-RED)/(NIR+C1*R-C2*BLUE+L))              |          |
+| Advanced Vegetation Index (AVI)                | (NIR*(1-RED)*(NIR-RED))^(1/3)                   |          |
+| Soil Adjusted Vegetation IndexSAVI             | ((NIR-RED)/(NIR+RED+L))*(1+L)                   |          |
+| NDMI                                           | (NIR-SWIR)/(NIR+SWIR)                           |          |
+| MSI                                            | MidIR/NIR                                       |          |
+| GCI                                            | (NIR)/(GREEN)-1                                 |          |
+| NBRI                                           | (NIR-SWIR)/(NIR+SWIR)                           |          |
+| BSI                                            | ((RED+SWIR)-(NIR+BLUE))/((RED+SWIR)+(NIR+BLUE)) |          |
+| NDSI                                           | (GREEN-SWIR)/(GREEN+SWIR)                       |          |
+| NDGI                                           | (NIR-GREEN)/(NIR+GREEN)                         |          |
