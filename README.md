@@ -39,7 +39,7 @@ singularity run lindex.img {PATH TO COMPRESSED DATA} -b {PASTE CORNER COORDINATE
 
 | Index Name                                     | Formula                                         | Citation |
 |------------------------------------------------|-------------------------------------------------|----------|
-| Normalized Difference Water Index (NDWI)       |                                                 |          |
+| Normalized Difference Water Index (NDWI)       | (NIR-SWIR)/(NIR+SIWR)                           |          |
 | Normalized Differencce Vegetation Index (NDVI) | (NIR-RED)/(NIR+RED)                             |          |
 | Enhanced Vegetation Index (EVI)                | G*((NIR-RED)/(NIR+C1*R-C2*BLUE+L))              |          |
 | Advanced Vegetation Index (AVI)                | (NIR*(1-RED)*(NIR-RED))^(1/3)                   |          |
