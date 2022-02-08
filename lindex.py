@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Author : Travis Simmons <travissimmons@email.arizona.edu>
+Author : Travis Simmons <920117874@student.ccga.edu>
 Date   : 2/20/2021
-Purpose: 
+Purpose: Automatically run index timeseries analysis
 """
 
 import argparse
@@ -274,50 +274,47 @@ def do_ndgi(date_folder):
     return ndgi
 
 
+def index_template(date_folder):
+
+    # replace the underscores with the band you need, repeat as necissary
+    band_ = glob.glob(os.path.join(date_folder, '*B_.TIF'))
+    b_ = rio.open(band_[0])
+
+    # After adding in each band you will be using, rename then as their common name eg: nir, red, green ...
+    # replace occurances of that below
+    green = b_.read()
+    green = green.astype(float)
+
+    # Replace index name with your index
+    # do the raster math with the common names
+    ndgi = (nir-green)/(nir+green)
+
+    # Close all the bands, repeat as necissary
+    b_.close()
+
+    # Scroll down and find 'index dict' to add your index to the options before running
+
 
 
 
 # --------------------------------------------------
 def main():
-    """Make a jazz noise here"""
 
     args = get_args()
-
-    # Variables
-
-    # Directory containing tar'd or foldered lansat data
-    # indir = r'D:\lansat\Bulk Order Large_lansat_8\test'
-
-    # How strict do you want the cloud recognition to be, the lower the more strict
-    # how_strict= 0.7
-
-
-    # # GPS Bounding Box for sampling area, [xmin, xmax, ymin, fymax]
-    
-    
-    # xmin ymin  xmax ymax - gdal 
-    
-    # xmin ymax xmax ymin
-
-    # x1 = 160785
-    # y1 = 3467622
-    # x2 = 169515
-    # y2 = 3462902
-
 
     index_dict = {
     'ndwi': do_ndwi, # working
     'ndvi': do_ndvi, # working
-    'evi' : do_evi,
-    'avi' : do_avi,
+    'evi' : do_evi,# working
+    'avi' : do_avi,# working
     'savi' : do_savi, # working
-    'ndmi' : do_ndmi,
-    'msi' : do_msi,
-    'gci' : do_gci,
-    'nbri' : do_nbri,
-    'bsi' : do_bsi,
-    'ndsi' : do_ndsi,
-    'ndgi' : do_ndgi, # not working
+    'ndmi' : do_ndmi,# working
+    'msi' : do_msi,# working
+    'gci' : do_gci,# working
+    'nbri' : do_nbri,# working
+    'bsi' : do_bsi,# working
+    'ndsi' : do_ndsi, # working
+    'ndgi' : do_ndgi, # add your custom index here
 
     }
     bb = args.bounding_box
@@ -329,33 +326,22 @@ def main():
 
 
     index_name = args.index
-    #--------------------------------------------------------------------------
-
-    # -Main-
-
 
     # If you ahve tars still in the directory, these will grab them and untar them
     
     tars = glob.glob(os.path.join(args.indir ,'*.tar'))
     print('Extracting tar files...')
 
-    # if len(tars) > 1:
     for tar in tars:
         out_file = tar.split('.')[0]
-
 
         # making a file for the tars to land
         if not os.path.exists(out_file):
             os.makedirs(out_file)
         one_tar = tarfile.open(tar)
         one_tar.extractall(out_file)
-            
-            
-    # # Function to take a lansat image and crop it to the sample area in Baker County, GA  
 
     lv1 = glob.glob(os.path.join(args.indir , '*'))
-    # print(lv1)
-    # print(lv1)
 
     print('Extraction complete, cropping Lansat images...')
     for folder in lv1:
@@ -366,9 +352,7 @@ def main():
 
             if folder_name.startswith('L'):
                 cnt = 1
-                # print(os.path.join(folder, '*.TIF'))
                 TIFs = glob.glob(os.path.join(folder, '*.TIF'))
-                # print(TIFs)
 
                 date = folder.split("_")[-4]
 
@@ -382,22 +366,13 @@ def main():
 
                 # Itterating through the image list
                 for im in TIFs:
-                    # print(im)
-
                     split = im.split('_')
                     date = split[-6]
                     band = split[-1]
                     filename = date+'_'+band
 
-
-
-            #         print(filename)
-
                     # Opening each one in GDAL
                     img = gdal.Open(im)
-
-                    # print('translating')
-                    # Need to add -a_ullr xmin ymax xmax ymin
 
                     # large extent
                     # 160894,3459609,173729,3468590
@@ -431,47 +406,38 @@ def main():
 
                 for img in band1_imgs:
                     filename = os.path.basename(img)
-    #                     print(img)
-    #                     pil_im = Image.open(img)
-    #                     display(pil_im)
+
                     # Open it, histogram mean, sort
                     testing_img = cv2.imread(img)
                     testing_vals = testing_img.mean(axis=2).flatten()
                     testing_mode = statistics.mode(testing_vals)
                     testing_average = statistics.mean(testing_vals)
 
-                    # print('Testing mode: ',testing_mode)
-                    # print('Testing Average: ', testing_average)
+
+
+                    # Here we are looking for unusable dates
+                    # first we look for black images, this indicates that although your roi was in the area of the scan, it was outside the imaged area
+                    # Then we use a series of statements to test for how variable the pixel intensities are
+                    # If they are highly variable they are likely cloudy
                     if testing_mode == 0.0:
                         print("Black image")
 
                     if (len([1 for i in testing_vals if i > testing_mode]) >= len(testing_vals)*args.how_strict) or (testing_average > 35) or (testing_average < 10):
-                        # print("Cloudy image")
-
-                        # print(date)
                         try:
                             shutil.move(os.path.join(args.indir, date), os.path.join(args.indir, 'cloudy'))
                         except:
                             continue
                     else:
-                        # print("Clear image")
-                        # print(date)
 
-                        # do NDWI Then move
-
-
+                        # Do index then move the images
 
                         # Here we can take flags for any index
                         index_eval = index_dict[args.index](date_folder)
 
 
-
-
-
                         # Plotting
                         fig, ax = plt.subplots(1, figsize=(12, 10))
                         show(index_eval, ax=ax, cmap="coolwarm_r")
-                        # testing
                         plt.axis('off')
 
                         plt.savefig(os.path.join(date_folder, date + f'_{index_name}.TIF'), bbox_inches = 'tight')
@@ -486,7 +452,9 @@ def main():
 
     ndwi_TIFs = glob.glob(os.path.join(args.indir, index_name, '*.TIF'))
 
-   
+
+
+
     for i in ndwi_TIFs:
         # Add coordinates
         img = gdal.Open(i)
