@@ -428,7 +428,8 @@ def main():
                     if testing_mode == 0.0:
                         print("Black image")
 
-                    if (len([1 for i in testing_vals if i > testing_mode]) >= len(testing_vals)*args.how_strict) or (testing_average > 35) or (testing_average < 10):
+                    # if (len([1 for i in testing_vals if i > testing_mode]) >= len(testing_vals)*args.how_strict) or (testing_average > 35) or (testing_average < 10):
+                    if len([1 for i in testing_vals if i > testing_mode]) >= len(testing_vals)*args.how_strict:
                         try:
                             shutil.move(os.path.join(args.indir, date), os.path.join(args.indir, 'cloudy'))
                         except:
