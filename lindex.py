@@ -17,6 +17,7 @@ import statistics
 import rasterio as rio
 import matplotlib.pyplot as plt
 from rasterio.plot import show
+import numpy as np
 from moviepy.editor import ImageSequenceClip
 
 # singularity run test.simg ~/data/landsat -b 444596.16110394 3437984.92577712 472974.60807573 3453852.93907577
@@ -116,6 +117,8 @@ def do_evi(date_folder):
     b4.close()
     b5.close()
     return evi
+
+
 
 def do_avi(date_folder):
     band4 = glob.glob(os.path.join(date_folder, '*B4.TIF'))
@@ -376,7 +379,6 @@ def main():
                         filename = filename.replace('_B4', '_B5')
                         filename = filename.replace('_B3', '_B4')
                         
-                        print('Warning, non landat 8 files detected, do not use clear and cloudy folders')
                     # Opening each one in GDAL
                     img = gdal.Open(im)
 
@@ -398,6 +400,14 @@ def main():
             
     if not os.path.exists(os.path.join(args.indir, index_name)):
             os.makedirs(os.path.join(args.indir, index_name))
+
+# Raw
+    if not os.path.exists(os.path.join(args.indir, index_name, 'raw')):
+            os.makedirs(os.path.join(args.indir, index_name, 'raw'))
+
+# Visualizations
+    if not os.path.exists(os.path.join(args.indir, index_name, 'visualizations')):
+            os.makedirs(os.path.join(args.indir, index_name, 'visualizations'))
     
     print(f'Scanning for cloudcover and running {index_name} analysis...')
 
@@ -441,14 +451,31 @@ def main():
                         # Here we can take flags for any index
                         index_eval = index_dict[args.index](date_folder)
 
+  
+
+# https://gis.stackexchange.com/questions/290776/how-to-create-a-tiff-file-using-gdal-from-a-numpy-array-and-specifying-nodata-va
+                        ds = gdal.Open(img)
+                        cols = ds.RasterXSize
+                        rows = ds.RasterYSize
+                        myarray = index_eval
+                        trans = ds.GetGeoTransform()
+                        # create the output image
+                        driver = ds.GetDriver()
+                        outDs = driver.Create(os.path.join(args.indir, index_name ,'raw', date + f'_{index_name}.TIF'), cols, rows, 1, gdal.GDT_Float32)
+                        outBand = outDs.GetRasterBand(1)
+                        # outBand.SetNoDataValue()
+                        outBand.WriteArray(myarray[0])
+                        outDs.SetGeoTransform(trans)
+
+
 
                         # Plotting
                         fig, ax = plt.subplots(1, figsize=(12, 10))
                         show(index_eval, ax=ax, cmap="coolwarm_r")
                         plt.axis('off')
 
-                        plt.savefig(os.path.join(date_folder, date + f'_{index_name}.TIF'), bbox_inches = 'tight')
-                        plt.savefig(os.path.join(args.indir, index_name , date + f'_{index_name}.TIF'), bbox_inches = 'tight')
+                        plt.savefig(os.path.join(date_folder, date + f'_color_{index_name}.TIF'), bbox_inches = 'tight')
+                        plt.savefig(os.path.join(args.indir, index_name ,'visualizations', date + f'_color_{index_name}.TIF'), bbox_inches = 'tight')
                         
 
                         try:
@@ -457,7 +484,7 @@ def main():
                             continue
 
 
-    ndwi_TIFs = glob.glob(os.path.join(args.indir, index_name, '*.TIF'))
+    ndwi_TIFs = glob.glob(os.path.join(args.indir, index_name, 'visualizations','*.TIF'))
 
 
 
@@ -478,7 +505,7 @@ def main():
 
     # ndwi_TIFs_labeled = glob.glob(os.path.join(args.indir, 'NDWI', '*labeled.TIF'))
     clip = ImageSequenceClip(ndwi_TIFs,fps=.20)
-    clip.write_gif(os.path.join(args.indir, index_name, 'final.gif'))
+    clip.write_gif(os.path.join(args.indir, index_name, 'visualizations','final.gif'))
 
 
     print(f'Finished analysis, find {index_name} outputs at {os.path.join(args.indir,index_name)}.')
