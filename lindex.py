@@ -371,6 +371,10 @@ def main():
                     band = split[-1]
                     filename = date+'_'+band
 
+                    if not folder_name.startswith('LC'):
+                        filename = filename.replace('_B4', '_B5')
+                        filename = filename.replace('_B3', '_B4')
+                        print('Warning, non landat 8 files detected, do not use clear and cloudy folders')
                     # Opening each one in GDAL
                     img = gdal.Open(im)
 
