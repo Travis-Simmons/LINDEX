@@ -48,10 +48,10 @@ def get_args():
 
     parser.add_argument('-c',
                         '--how_strict',
-                        help='How strict do you want the cloud recognition to be, the lower the more strict',
+                        help='How strict do you want the cloud recognition to be, the lower the more strict, 999 turns it off, suggested is 0.7',
                         metavar='how_strict',
                         type=float,
-                        default=0.7)
+                        default=999)
 
     parser.add_argument('-in',
                         '--index',
@@ -296,6 +296,38 @@ def index_template(date_folder):
 
 
 
+def check_cloudy(img):
+    # Open it, histogram mean, sort
+    testing_img = cv2.imread(img)
+    testing_vals = testing_img.mean(axis=2).flatten()
+    testing_mode = statistics.mode(testing_vals)
+    testing_average = statistics.mean(testing_vals)
+
+    
+    # Here we are looking for unusable dates
+    # first we look for black images, this indicates that although your roi was in the area of the scan, it was outside the imaged area
+    # Then we use a series of statements to test for how variable the pixel intensities are
+    # If they are highly variable they are likely cloudy
+    if testing_mode == 0.0:
+        print("Black image")
+    
+    # checking for heterogeneity of pixel intensities
+    if (len([1 for i in testing_vals if i > testing_mode]) >= len(testing_vals)*args.how_strict):
+        return True
+    
+    # testing for a super bright image (mostly clouds but homogenious so it wont get caught in cloud detection)
+    elif testing_average > 35:
+        return True
+
+    # testing for super dark image
+    elif testing_average < 10:
+        return True
+        
+    else:
+        return False
+
+
+
 
 # --------------------------------------------------
 def main():
@@ -317,6 +349,53 @@ def main():
     'ndgi' : do_ndgi, # add your custom index here
 
     }
+
+    # we want to use the band names for landsat8 for all calcs
+    # format = landsat8 band : new band
+    # In development
+    bands_dict = {
+        'landsat_8_9':{
+            'B1':'B1',
+            'B2':'B2',
+            'B3':'B3',
+            'B4':'B4',
+            'B5':'B5',
+            'B6':'B6',
+            'B7':'B7',
+            'B8':'B8',
+            'B9':'B9',
+            'B10':'B10',
+            'B11':'B11'
+        },
+        # add in warning for bands
+        'landsat_7':{
+            'B2':'B1',
+            'B3':'B2',
+            'B4':'B3',
+            'B5':'B4',
+            'B6':'B5',
+            'B7':'B7',
+            'B8':'B8',
+            'B10':'B6'
+        },
+
+        'landsat_4_5':{
+
+        },
+
+        'landsat_1_5':{
+
+        }
+
+    }
+
+
+
+
+
+
+
+
     bb = args.bounding_box
 
     xmin = int(bb[0])
@@ -407,28 +486,23 @@ def main():
                 for img in band1_imgs:
                     filename = os.path.basename(img)
 
-                    # Open it, histogram mean, sort
-                    testing_img = cv2.imread(img)
-                    testing_vals = testing_img.mean(axis=2).flatten()
-                    testing_mode = statistics.mode(testing_vals)
-                    testing_average = statistics.mean(testing_vals)
 
 
+                    # Check if the user wants to check for clouds
+                    if not args.how_strict == 999:
+                        is_cloudy = check_cloudy(img)
 
-                    # Here we are looking for unusable dates
-                    # first we look for black images, this indicates that although your roi was in the area of the scan, it was outside the imaged area
-                    # Then we use a series of statements to test for how variable the pixel intensities are
-                    # If they are highly variable they are likely cloudy
-                    if testing_mode == 0.0:
-                        print("Black image")
+                    else:
+                        is_cloudy = False
 
-                    if (len([1 for i in testing_vals if i > testing_mode]) >= len(testing_vals)*args.how_strict) or (testing_average > 35) or (testing_average < 10):
+                    if is_clouty == True:
+    
                         try:
                             shutil.move(os.path.join(args.indir, date), os.path.join(args.indir, 'cloudy'))
                         except:
                             continue
                     else:
-
+                        
                         # Do index then move the images
 
                         # Here we can take flags for any index
