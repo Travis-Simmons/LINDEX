@@ -58,7 +58,7 @@ def get_args():
                         help='What index to run',
                         metavar='index',
                         type=str,
-                        default='NDWI')
+                        default='ndwi')
 
     return parser.parse_args()
 
@@ -495,7 +495,7 @@ def main():
                     else:
                         is_cloudy = False
 
-                    if is_clouty == True:
+                    if is_cloudy == True:
     
                         try:
                             shutil.move(os.path.join(args.indir, date), os.path.join(args.indir, 'cloudy'))
