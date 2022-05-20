@@ -472,6 +472,15 @@ def main():
     if not os.path.exists(os.path.join(args.indir, index_name)):
             os.makedirs(os.path.join(args.indir, index_name))
     
+
+# Raw
+    if not os.path.exists(os.path.join(args.indir, index_name, 'raw')):
+            os.makedirs(os.path.join(args.indir, index_name, 'raw'))
+
+# Visualizations
+    if not os.path.exists(os.path.join(args.indir, index_name, 'visualizations')):
+            os.makedirs(os.path.join(args.indir, index_name, 'visualizations'))
+
     print(f'Scanning for cloudcover and running {index_name} analysis...')
 
     for date_folder in lv2:
@@ -508,6 +517,23 @@ def main():
                         # Here we can take flags for any index
                         index_eval = index_dict[args.index](date_folder)
 
+# https://gis.stackexchange.com/questions/290776/how-to-create-a-tiff-file-using-gdal-from-a-numpy-array-and-specifying-nodata-va
+                        ds = gdal.Open(img)
+                        cols = ds.RasterXSize
+                        rows = ds.RasterYSize
+                        myarray = index_eval
+                        trans = ds.GetGeoTransform()
+                        # create the output image
+                        driver = ds.GetDriver()
+                        outDs = driver.Create(os.path.join(args.indir, index_name ,'raw', date + f'_{index_name}.TIF'), cols, rows, 1, gdal.GDT_Float32)
+                        outBand = outDs.GetRasterBand(1)
+                        # outBand.SetNoDataValue()
+                        outBand.WriteArray(myarray[0])
+                        outDs.SetGeoTransform(trans)
+
+
+
+
 
                         # Plotting
                         fig, ax = plt.subplots(1, figsize=(12, 10))
@@ -515,7 +541,7 @@ def main():
                         plt.axis('off')
 
                         plt.savefig(os.path.join(date_folder, date + f'_{index_name}.TIF'), bbox_inches = 'tight')
-                        plt.savefig(os.path.join(args.indir, index_name , date + f'_{index_name}.TIF'), bbox_inches = 'tight')
+                        plt.savefig(os.path.join(args.indir, index_name, 'visualizations' , date + f'_{index_name}.TIF'), bbox_inches = 'tight')
                         
 
                         try:
@@ -524,7 +550,7 @@ def main():
                             continue
 
 
-    ndwi_TIFs = glob.glob(os.path.join(args.indir, index_name, '*.TIF'))
+    ndwi_TIFs = glob.glob(os.path.join(args.indir, index_name, 'visualizations', '*.TIF'))
 
 
 
@@ -545,7 +571,7 @@ def main():
 
     # ndwi_TIFs_labeled = glob.glob(os.path.join(args.indir, 'NDWI', '*labeled.TIF'))
     clip = ImageSequenceClip(ndwi_TIFs,fps=.20)
-    clip.write_gif(os.path.join(args.indir, index_name, 'final.gif'))
+    clip.write_gif(os.path.join(args.indir, index_name, 'visualizations', 'final.gif'))
 
 
     print(f'Finished analysis, find {index_name} outputs at {os.path.join(args.indir,index_name)}.')
