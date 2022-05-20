@@ -59,7 +59,7 @@ def get_args():
                         help='What index to run',
                         metavar='index',
                         type=str,
-                        default='NDWI')
+                        default='ndwi')
 
     return parser.parse_args()
 
