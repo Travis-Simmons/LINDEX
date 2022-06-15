@@ -331,7 +331,7 @@ def check_cloudy(img):
 
 # --------------------------------------------------
 def main():
-
+    global args
     args = get_args()
 
     index_dict = {
