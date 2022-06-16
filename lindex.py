@@ -274,25 +274,27 @@ def do_ndgi(date_folder):
     return ndgi
 
 
-def index_template(date_folder):
+def custom_index_template(date_folder):
 
     # replace the underscores with the band you need, repeat as necissary
     band_ = glob.glob(os.path.join(date_folder, '*B_.TIF'))
     b_ = rio.open(band_[0])
 
-    # After adding in each band you will be using, rename then as their common name eg: nir, red, green ...
-    # replace occurances of that below
-    green = b_.read()
-    green = green.astype(float)
+    # After adding in each band you will be using, 
+    # rename then as their common name eg: nir, red, green ...
+    band_name = b_.read()
+    band_name = band_name.astype(float)
 
     # Replace index name with your index
     # do the raster math with the common names
-    ndgi = (nir-green)/(nir+green)
+    index_name = (band_name-band_name)/(band_name+band_name)
 
     # Close all the bands, repeat as necissary
     b_.close()
 
-    # Scroll down and find 'index dict' to add your index to the options before running
+    # Scroll down and find 'index dict'
+    # to add your index to the options before running
+    return index_name
 
 
 
