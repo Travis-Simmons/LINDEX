@@ -56,3 +56,6 @@ singularity run lindex.img {PATH TO COMPRESSED DATA} -b {PASTE CORNER COORDINATE
 ## Custom Indices
 
 Refer to the index template function in lindex.py in order to add your own custom index.
+
+
+DOI: 10.1002/essoar.10511799.1
